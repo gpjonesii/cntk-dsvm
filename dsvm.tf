@@ -1,52 +1,52 @@
 provider "azurerm" {
-    subscription_id = "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    client_id       = "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    client_secret   = "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    tenant_id       = "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    subscription_id = ""
+    client_id       = ""
+    client_secret   = ""
+    tenant_id       = ""
 }
 
-resource "azurerm_resource_group" "dvsmresourcegroup" {
-    name     = "dvsmResourceGroup"
+resource "azurerm_resource_group" "dsvmresourcegroup" {
+    name     = "dsvmResourceGroup"
     location = "East US"
 
     tags {
-        environment = "CNTK DVSM Workshop"
+        environment = "CNTK DSVM Workshop"
     }
 }
 
-resource "azurerm_virtual_network" "dvsmnetwork" {
-    name                = "dvsmVnet"
+resource "azurerm_virtual_network" "dsvmnetwork" {
+    name                = "dsvmVnet"
     address_space       = ["10.0.0.0/16"]
     location            = "East US"
-    resource_group_name = "${azurerm_resource_group.dvsmresourcegroup.name}"
+    resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
 
     tags {
-        environment = "CNTK DVSM Demo "
+        environment = "CNTK DSVM Demo "
     }
 }
 
-resource "azurerm_subnet" "dvsmsubnet" {
-    name                 = "dvsmSubnet"
-    resource_group_name  = "${azurerm_resource_group.dvsmresourcegroup.name}"
-    virtual_network_name = "${azurerm_virtual_network.dvsmnetwork.name}"
+resource "azurerm_subnet" "dsvmsubnet" {
+    name                 = "dsvmSubnet"
+    resource_group_name  = "${azurerm_resource_group.dsvmresourcegroup.name}"
+    virtual_network_name = "${azurerm_virtual_network.dsvmnetwork.name}"
     address_prefix       = "10.0.2.0/24"
 }
 
-resource "azurerm_public_ip" "dvsmpublicip" {
-    name                         = "dvsmPublicIP"
+resource "azurerm_public_ip" "dsvmpublicip" {
+    name                         = "dsvmPublicIP"
     location                     = "East US"
-    resource_group_name          = "${azurerm_resource_group.dvsmresourcegroup.name}"
+    resource_group_name          = "${azurerm_resource_group.dsvmresourcegroup.name}"
     public_ip_address_allocation = "dynamic"
 
     tags {
-        environment = "CNTK DVSM Workshop"
+        environment = "CNTK DSVM Workshop"
     }
 }
 
-resource "azurerm_network_security_group" "dvsmpublicipnsg" {
-    name                = "dvsmNetworkSecurityGroup"
+resource "azurerm_network_security_group" "dsvmpublicipnsg" {
+    name                = "dsvmNetworkSecurityGroup"
     location            = "East US"
-    resource_group_name = "${azurerm_resource_group.dvsmresourcegroup.name}"
+    resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
 
     security_rule {
         name                       = "SSH"
@@ -60,57 +60,70 @@ resource "azurerm_network_security_group" "dvsmpublicipnsg" {
         destination_address_prefix = "*"
     }
 
+    security_rule {
+        name                       = "JUPYTER"
+        priority                   = 1002
+        direction                  = "Inbound"
+        access                     = "Allow"
+        protocol                   = "Tcp"
+        source_port_range          = "*"
+        destination_port_range     = "8081"
+        source_address_prefix      = "*"
+        destination_address_prefix = "*"
+    }
+
     tags {
-        environment = "CNTK DVSM Workshop"
+        environment = "CNTK DSVM Workshop"
     }
 }
 
-resource "azurerm_network_interface" "dvsmnic" {
-    name                = "dvsmNIC"
+resource "azurerm_network_interface" "dsvmnic" {
+    name                = "dsvmNIC"
     location            = "East US"
-    resource_group_name = "${azurerm_resource_group.dvsmresroucegroup.name}"
+    resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
 
     ip_configuration {
-        name                          = "dvsmNicConfiguration"
-        subnet_id                     = "${azurerm_subnet.dvsmsubnet.id}"
+        name                          = "dsvmNicConfiguration"
+        subnet_id                     = "${azurerm_subnet.dsvmsubnet.id}"
         private_ip_address_allocation = "dynamic"
-        public_ip_address_id          = "${azurerm_public_ip.dvsmpublicip.id}"
+        public_ip_address_id          = "${azurerm_public_ip.dsvmpublicip.id}"
     }
 
     tags {
-        environment = "CNTK DVSM Workshop"
+        environment = "CNTK DSVM Workshop"
     }
 }
 
 resource "random_id" "randomId" {
     keepers = {
         # Generate a new ID only when a new resource group is defined
-        resource_group = "${azurerm_resource_group.dvsmresourcegroup.name}"
+        resource_group = "${azurerm_resource_group.dsvmresourcegroup.name}"
     }
 
     byte_length = 8
 }
 
-resource "azurerm_storage_account" "mystorageaccount" {
+resource "azurerm_storage_account" "dsvmstorageaccount" {
     name                = "diag${random_id.randomId.hex}"
-    resource_group_name = "${azurerm_resource_group.dvsmresourcegroup.name}"
+    resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
     location            = "East US"
-    account_type        = "Standard_LRS"
+    account_tier        = "Standard"
+    account_replication_type = "LRS"
 
     tags {
-        environment = "CNTK DVSM Workshop"
+        environment = "CNTK DSVM Workshop"
     }
 }
 
-resource "azurerm_virtual_machine" "dvsmvm" {
-    name                  = "dvsmVM"
+resource "azurerm_virtual_machine" "dsvmvm" {
+    name                  = "dsvmVM"
     location              = "East US"
-    resource_group_name   = "${azurerm_resource_group.dvsmresroucegroup.name}"
-    network_interface_ids = ["${azurerm_network_interface.dvsmnic.id}"]
+    resource_group_name   = "${azurerm_resource_group.dsvmresourcegroup.name}"
+    network_interface_ids = ["${azurerm_network_interface.dsvmnic.id}"]
     vm_size               = "Standard_DS1_v2"
 
     storage_os_disk {
-        name              = "dvsmOsDisk"
+        name              = "dsvmOsDisk"
         caching           = "ReadWrite"
         create_option     = "FromImage"
         managed_disk_type = "Premium_LRS"
@@ -122,9 +135,15 @@ resource "azurerm_virtual_machine" "dvsmvm" {
         sku       = "linuxdsvmubuntu"
         version   = "latest"
     }
+    
+    plan {
+        name = "linuxdsvmubuntu"
+        publisher = "microsoft-ads"
+        product = "linux-data-science-vm-ubuntu"
+    }
 
     os_profile {
-        computer_name  = "dvsm"
+        computer_name  = "dsvm"
         admin_username = "azureuser"
     }
 
@@ -132,16 +151,16 @@ resource "azurerm_virtual_machine" "dvsmvm" {
         disable_password_authentication = true
         ssh_keys {
             path     = "/home/azureuser/.ssh/authorized_keys"
-            key_data = "ssh-rsa AAAAB3Nz{snip}hwhqT9h"
+            key_data = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+6GRn1V0LaepPJiqu18RtAUeSi/Oz4EfocS17cgthvXZKhqelPR0E1tlEN1RXlPrUnXivOxgePXjoJOau7lKi/244xCtrMLXsIjA7Yfl4bop0EgCndHo7EBW9t2ouyrQuIp3LN+YPx6j8aLMLVlbs88A8aytAJC/QuuSXa5nTU8ptWHP/y5eb4OfHFXLks655LLWTX1L9fmNyqtQEBM2posVric1m/rfc5kya7EW9bGNuAjXGtUUhGkAAs2m/hzA3X3LomsVz4bpaAozBH5plMKWy8TB1On2bBYAvH7FL4C8dG9liRv2Xh10yw4mR8r7jIUYdeiDs+opfRE3PRFkJ"
         }
     }
 
     boot_diagnostics {
         enabled     = "true"
-        storage_uri = "${azurerm_storage_account.dvsmstorageaccount.primary_blob_endpoint}"
+        storage_uri = "${azurerm_storage_account.dsvmstorageaccount.primary_blob_endpoint}"
     }
 
     tags {
-        environment = "CNTK DVSM Workshop"
+        environment = "CNTK DSVM Workshop"
     }
 }
