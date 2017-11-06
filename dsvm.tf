@@ -167,7 +167,7 @@ resource "azurerm_virtual_machine" "dsvmvm" {
     location              = "East US"
     resource_group_name   = "${azurerm_resource_group.dsvmresourcegroup.name}"
     network_interface_ids = ["${azurerm_network_interface.dsvmnic.id}"]
-    vm_size               = "Standard_DS1_v2"
+    vm_size               = "Standard_NC6"
 
     storage_os_disk {
         name              = "dsvmOsDisk"
