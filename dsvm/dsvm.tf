@@ -7,7 +7,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "dsvmresourcegroup" {
     name     = "dsvmResourceGroup"
-    location = "East US"
+    location = "West US 2"
 
     tags {
         environment = "CNTK DSVM Workshop"
@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "dsvmresourcegroup" {
 resource "azurerm_virtual_network" "dsvmnetwork" {
     name                = "dsvmVnet"
     address_space       = ["10.0.0.0/16"]
-    location            = "East US"
+    location            = "West US 2"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
 
     tags {
@@ -34,7 +34,7 @@ resource "azurerm_subnet" "dsvmsubnet" {
 
 resource "azurerm_public_ip" "dsvmpublicip" {
     name                         = "dsvmPublicIP"
-    location                     = "East US"
+    location                     = "West US 2"
     resource_group_name          = "${azurerm_resource_group.dsvmresourcegroup.name}"
     public_ip_address_allocation = "dynamic"
 
@@ -45,7 +45,7 @@ resource "azurerm_public_ip" "dsvmpublicip" {
 
 resource "azurerm_network_security_group" "dsvmpublicipnsg" {
     name                = "dsvmNetworkSecurityGroup"
-    location            = "East US"
+    location            = "West US 2"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
 
     security_rule {
@@ -126,7 +126,7 @@ resource "azurerm_network_security_group" "dsvmpublicipnsg" {
 
 resource "azurerm_network_interface" "dsvmnic" {
     name                = "dsvmNIC"
-    location            = "East US"
+    location            = "West US 2"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
 
     ip_configuration {
@@ -153,7 +153,7 @@ resource "random_id" "randomId" {
 resource "azurerm_storage_account" "dsvmstorageaccount" {
     name                = "diag${random_id.randomId.hex}"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
-    location            = "East US"
+    location            = "West US 2"
     account_tier        = "Standard"
     account_replication_type = "LRS"
 
@@ -164,10 +164,10 @@ resource "azurerm_storage_account" "dsvmstorageaccount" {
 
 resource "azurerm_virtual_machine" "dsvmvm" {
     name                  = "dsvmVM"
-    location              = "East US"
+    location              = "West US 2"
     resource_group_name   = "${azurerm_resource_group.dsvmresourcegroup.name}"
     network_interface_ids = ["${azurerm_network_interface.dsvmnic.id}"]
-    vm_size               = "Standard_DS1_v2"
+    vm_size               = "Standard_NC6"
 
     storage_os_disk {
         name              = "dsvmOsDisk"
@@ -192,10 +192,11 @@ resource "azurerm_virtual_machine" "dsvmvm" {
     os_profile {
         computer_name  = "dsvm"
         admin_username = "azureuser"
+        admin_password = "MScntk2017!"
     }
 
     os_profile_linux_config {
-        disable_password_authentication = true
+        disable_password_authentication = false
         ssh_keys {
             path     = "/home/azureuser/.ssh/authorized_keys"
             key_data = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+6GRn1V0LaepPJiqu18RtAUeSi/Oz4EfocS17cgthvXZKhqelPR0E1tlEN1RXlPrUnXivOxgePXjoJOau7lKi/244xCtrMLXsIjA7Yfl4bop0EgCndHo7EBW9t2ouyrQuIp3LN+YPx6j8aLMLVlbs88A8aytAJC/QuuSXa5nTU8ptWHP/y5eb4OfHFXLks655LLWTX1L9fmNyqtQEBM2posVric1m/rfc5kya7EW9bGNuAjXGtUUhGkAAs2m/hzA3X3LomsVz4bpaAozBH5plMKWy8TB1On2bBYAvH7FL4C8dG9liRv2Xh10yw4mR8r7jIUYdeiDs+opfRE3PRFkJ"

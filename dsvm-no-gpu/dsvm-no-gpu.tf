@@ -167,7 +167,7 @@ resource "azurerm_virtual_machine" "dsvmvm" {
     location              = "East US"
     resource_group_name   = "${azurerm_resource_group.dsvmresourcegroup.name}"
     network_interface_ids = ["${azurerm_network_interface.dsvmnic.id}"]
-    vm_size               = "Standard_NC6"
+    vm_size               = "Standard_DS1_v2"
 
     storage_os_disk {
         name              = "dsvmOsDisk"
@@ -192,10 +192,11 @@ resource "azurerm_virtual_machine" "dsvmvm" {
     os_profile {
         computer_name  = "dsvm"
         admin_username = "azureuser"
+        admin_password = "MScntk2017!"
     }
 
     os_profile_linux_config {
-        disable_password_authentication = true
+        disable_password_authentication = false
         ssh_keys {
             path     = "/home/azureuser/.ssh/authorized_keys"
             key_data = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+6GRn1V0LaepPJiqu18RtAUeSi/Oz4EfocS17cgthvXZKhqelPR0E1tlEN1RXlPrUnXivOxgePXjoJOau7lKi/244xCtrMLXsIjA7Yfl4bop0EgCndHo7EBW9t2ouyrQuIp3LN+YPx6j8aLMLVlbs88A8aytAJC/QuuSXa5nTU8ptWHP/y5eb4OfHFXLks655LLWTX1L9fmNyqtQEBM2posVric1m/rfc5kya7EW9bGNuAjXGtUUhGkAAs2m/hzA3X3LomsVz4bpaAozBH5plMKWy8TB1On2bBYAvH7FL4C8dG9liRv2Xh10yw4mR8r7jIUYdeiDs+opfRE3PRFkJ"
