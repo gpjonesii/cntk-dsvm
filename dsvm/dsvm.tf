@@ -173,7 +173,7 @@ resource "azurerm_virtual_machine" "dsvmvm" {
         name              = "dsvmOsDisk"
         caching           = "ReadWrite"
         create_option     = "FromImage"
-        managed_disk_type = "Standard_GRS"
+        managed_disk_type = "Standard_LRS"
     }
 
     storage_image_reference {
