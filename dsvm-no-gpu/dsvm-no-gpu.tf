@@ -128,7 +128,7 @@ resource "azurerm_network_interface" "dsvmnic" {
     name                = "dsvmNIC"
     location            = "East US"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
-
+    network_security_group_id - "${azurerm_network_security_group.dsvmpublicipnsg.id}"
     ip_configuration {
         name                          = "dsvmNicConfiguration"
         subnet_id                     = "${azurerm_subnet.dsvmsubnet.id}"
